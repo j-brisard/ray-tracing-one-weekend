@@ -3,7 +3,32 @@
 #include "color.h"
 #include "ray.h"
 
+//SPHERE
+/*
+WARNING, here we're setting the sphere in front of the camera, but it would also be drawn in the viewport
+if we placed it behing because we're not restricting t to positive values in hit_sphere
+*/
+const point3 S_CENTER = {0, 0, -5};
+const double S_RADIUS = 1;
+
+bool hit_sphere(const point3& center, const double radius, const ray& r){
+    //Returns true if ray r hits the sphere(center, radius)
+    //TO FIX
+    vec3 qc = center - r.origin();
+    const vec3 d = r.direction();
+    double a = dot(d, d);
+    double b = dot(-2*d,qc);
+    double c = dot(qc,qc)-radius*radius;
+
+    double delta = b*b-4*a*c;
+
+    return (delta >=0);
+}
+
 color ray_color(const ray& r) {
+    if (hit_sphere(S_CENTER,S_RADIUS, r)){
+        return color(0., 1., 0.);
+    }
     auto norm_dir = unit_vector(r.direction());
     auto indicator = 0.5*(norm_dir.y()+1.);
     return (1-indicator)*color(1.0,1.0,1.0)+indicator*color(0.5, 0.7, 1.0);
