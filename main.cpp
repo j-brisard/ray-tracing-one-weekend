@@ -1,41 +1,17 @@
-#include <iostream>
-#include "vec3.h"
-#include "color.h"
-#include "ray.h"
+#include "rtweekend.h"
+#include "hittable.h"
+#include "hittable_list.h"
+#include "sphere.h"
 
-//SPHERE
-const point3 S_CENTER = {0, 0, -2};
-const double S_RADIUS = 0.5;
-
-double hit_sphere(const point3& center, const double radius, const ray& r){
-    //Returns -1 if ray r doesn't hit the sphere
-    //Else, return the t values of the nearest hit point
-
-    vec3 qc = center - r.origin();
-    const vec3 d = r.direction();
-    double a = dot(d, d);
-    double b = dot(-2*d,qc);
-    double c = dot(qc,qc)-radius*radius;
-    double delta = b*b-4*a*c;
-    
-    if (delta < 0.0) { // No intersection
-        return -1.0;
-    } else {
-        return (-b - std::sqrt(delta)) / (2.0 * a); // plus petite solution
+color ray_color(const ray& r, const hittable& world) {
+    hit_record rec;
+    if (world.hit(r, interval(0, infinity), rec)) {
+        return 0.5 * (rec.normal + color(1,1,1));
     }
 
-}
-
-color ray_color(const ray& r) {
-    double t = hit_sphere(S_CENTER,S_RADIUS, r);
-    if (t>0){
-        vec3 n = unit_vector(r.at(t)-S_CENTER);
-        return 0.5*color(n.x()+1, n.y()+1, n.z()+1);
-    }
-
-    auto norm_dir = unit_vector(r.direction());
-    auto indicator = 0.5*(norm_dir.y()+1.);
-    return (1-indicator)*color(1.0,1.0,1.0)+indicator*color(0.5, 0.7, 1.0);
+    vec3 unit_direction = unit_vector(r.direction());
+    auto a = 0.5*(unit_direction.y() + 1.0);
+    return (1.0-a)*color(1.0, 1.0, 1.0) + a*color(0.5, 0.7, 1.0);
 }
 
 int main() {
@@ -48,6 +24,13 @@ int main() {
     // Calculate the image height, and ensure that it's at least 1.
     int image_height = int(image_width / aspect_ratio);
     image_height = (image_height < 1) ? 1 : image_height;
+
+     // World
+
+    hittable_list world;
+
+    world.add(make_shared<sphere>(point3(0,0,-1), 0.5)); //Small sphere
+    world.add(make_shared<sphere>(point3(0,-100.5,-1), 100)); //Huge sphere simulating the floor
 
     // Camera
 
@@ -81,7 +64,7 @@ int main() {
             auto ray_direction = pixel_center - camera_center;
             ray r(camera_center, ray_direction);
 
-            color pixel_color = ray_color(r);
+            color pixel_color = ray_color(r, world);
 
             write_color(std::cout, pixel_color);
         }
