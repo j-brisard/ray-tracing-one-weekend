@@ -9,6 +9,7 @@ class camera {
     double aspect_ratio = 1.0;
     int image_width = 100;
     int samples_per_pixel = 10;
+    int max_depth = 10;   // Maximum number of ray bounces into scene
 
     void render(const hittable& world) {
         initialize();
@@ -24,7 +25,7 @@ class camera {
                 color pixel_color(0,0,0);
                 for (int n=0; n<samples_per_pixel;n++){
                     ray r = get_ray(i,j);
-                    pixel_color += ray_color(r, world);
+                    pixel_color += ray_color(r, max_depth, world);
                 }
                 
                 pixel_color /= samples_per_pixel; //Averages the samples' colors
@@ -86,11 +87,15 @@ class camera {
         return vec3(random_double() - 0.5, random_double() - 0.5, 0);
     }
 
-    color ray_color(const ray& r, const hittable& world) const {
+    color ray_color(const ray& r, int depth, const hittable& world) const {
+        // If we've exceeded the ray bounce limit, no more light is gathered.
+        if (depth <= 0)
+            return color(0,0,0);
+
         hit_record rec;
-        if (world.hit(r, interval(0, infinity), rec)) { //If ray r hits a hittable object in our world
+        if (world.hit(r, interval(0, 100), rec)) { //If ray r hits a hittable object in our world
             vec3 direction = random_on_hemisphere(rec.normal); //We pick a random unit vector pointing out of the surface
-            return 0.5 * ray_color(ray(rec.p, direction), world); // And we return the value of the ray going from the intersection point in the random direction
+            return 0.5 * ray_color(ray(rec.p, direction), depth-1, world); // And we return the value of the ray going from the intersection point in the random direction
         }
 
         vec3 unit_direction = unit_vector(r.direction());

@@ -1,4 +1,6 @@
-## Ray Tracing in One Weekend
+# Ray Tracing in One Weekend
+
+## Features
 
 - This project is a simple raytracer producing a .ppm image
 - Implementing a camera and viewport
@@ -6,3 +8,7 @@
 - A general hittable object
 - A list of hittable objects representing a world
 - Antialiasing
+
+## Bonus features
+
+- Planes
