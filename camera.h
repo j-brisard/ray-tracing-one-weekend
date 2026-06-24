@@ -88,8 +88,9 @@ class camera {
 
     color ray_color(const ray& r, const hittable& world) const {
         hit_record rec;
-        if (world.hit(r, interval(0, infinity), rec)) {
-            return 0.5 * (rec.normal + color(1,1,1));
+        if (world.hit(r, interval(0, infinity), rec)) { //If ray r hits a hittable object in our world
+            vec3 direction = random_on_hemisphere(rec.normal); //We pick a random unit vector pointing out of the surface
+            return 0.5 * ray_color(ray(rec.p, direction), world); // And we return the value of the ray going from the intersection point in the random direction
         }
 
         vec3 unit_direction = unit_vector(r.direction());

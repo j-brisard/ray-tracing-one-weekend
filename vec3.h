@@ -41,6 +41,16 @@ class vec3 {
     double length_squared() const {
         return e[0]*e[0] + e[1]*e[1] + e[2]*e[2];
     }
+
+    static vec3 random() {
+        //Returns a random vec3 with x,y,z between 0.0 and 1.0
+        return vec3(random_double(), random_double(), random_double());
+    }
+
+    static vec3 random(double min, double max) {
+        //Returns a random vec3 with x,y,z between min and max arguments
+        return vec3(random_double(min,max), random_double(min,max), random_double(min,max));
+    }
 };
 
 // point3 is just an alias for vec3, but useful for geometric clarity in the code.
@@ -91,6 +101,30 @@ inline vec3 cross(const vec3& u, const vec3& v) {
 
 inline vec3 unit_vector(const vec3& v) {
     return v / v.length();
+}
+
+inline vec3 random_unit_vector() {
+    //Returns a random unit vector
+    while (true) {
+        auto p = vec3::random(-1,1); //We pick a random point in the unit cube
+        auto lensq = p.length_squared();
+        /*
+        We only keep the points that are in the unit sphere, because the area around the area outside the sphere is bigger around
+        the vertices of the cube than around the edges. So there would be more vectors pointing to the vertices of the cube
+        and the distribution wouldn't be uniform.
+        We also reject points that are too close to the center to avoid normalizing with a norm of zero (/0) (due to rounding)
+        */
+        if (1e-160 < lensq && lensq <= 1)
+            return p / sqrt(lensq);
+    }
+}
+
+inline vec3 random_on_hemisphere(const vec3& normal) {
+    vec3 on_unit_sphere = random_unit_vector();
+    if (dot(on_unit_sphere, normal) > 0.0) // In the same hemisphere as the normal
+        return on_unit_sphere;
+    else
+        return -on_unit_sphere;
 }
 
 #endif
