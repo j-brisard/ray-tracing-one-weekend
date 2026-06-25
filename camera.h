@@ -93,8 +93,8 @@ class camera {
             return color(0,0,0);
 
         hit_record rec;
-        if (world.hit(r, interval(0, 100), rec)) { //If ray r hits a hittable object in our world
-            vec3 direction = random_on_hemisphere(rec.normal); //We pick a random unit vector pointing out of the surface
+        if (world.hit(r, interval(0.001, infinity), rec)) {//If ray r hits a hittable object in our world
+            vec3 direction = unit_vector(rec.normal + random_unit_vector()); //Lambertian distibution: direction is proportional to cos(n,ray)
             return 0.5 * ray_color(ray(rec.p, direction), depth-1, world); // And we return the value of the ray going from the intersection point in the random direction
         }
 
