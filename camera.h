@@ -2,6 +2,7 @@
 #define CAMERA_H
 
 #include "hittable.h"
+#include "material.h"
 
 class camera {
   public:
@@ -94,8 +95,14 @@ class camera {
 
         hit_record rec;
         if (world.hit(r, interval(0.001, infinity), rec)) {//If ray r hits a hittable object in our world
-            vec3 direction = unit_vector(rec.normal + random_unit_vector()); //Lambertian distibution: direction is proportional to cos(n,ray)
-            return 0.5 * ray_color(ray(rec.p, direction), depth-1, world); // And we return the value of the ray going from the intersection point in the random direction
+            color albedo;
+            ray scattered;
+            if (rec.mat->scatter(r,rec,albedo,scattered)){
+                return albedo*ray_color(scattered,depth-1,world);
+            }
+            else{
+                return color(0,0,0);
+            }
         }
 
         vec3 unit_direction = unit_vector(r.direction());

@@ -5,7 +5,7 @@
 
 class plane: public hittable {
   public:
-    plane(const point3& point, const vec3& normal) : point(point), normal(normal) {}
+    plane(const point3& point, const vec3& normal, shared_ptr<material> mat) : point(point), normal(normal), mat(mat) {}
 
    bool hit(const ray& r, interval ray_t, hit_record& rec) const override {
 
@@ -24,6 +24,7 @@ class plane: public hittable {
         rec.t = root;
         rec.p = r.at(rec.t);
         rec.set_face_normal(r, unit_vector(normal));
+        rec.mat = mat;
 
         return true;
     }
@@ -31,6 +32,7 @@ class plane: public hittable {
   private:
     point3 point;
     vec3 normal;
+    shared_ptr<material> mat;
 };
 
 #endif
