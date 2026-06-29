@@ -64,13 +64,25 @@ class dielectric : public material {
       the refractive index of the enclosing media
       */
         attenuation = color(1.0, 1.0, 1.0);
-        
+
         double ri = rec.front_face ? (1.0/refraction_index) : refraction_index;
 
         vec3 unit_direction = unit_vector(r_in.direction());
-        vec3 refracted = refract(unit_direction, rec.normal, ri);
 
-        scattered = ray(rec.p, refracted);
+        double cos_theta = std::fmin(dot(-unit_direction, rec.normal), 1.0);
+        double sin_theta = std::sqrt(1.0 - cos_theta*cos_theta);
+
+        //According to Snell's Law, the ray can't be refracted if ri(ratio of indexes) * sin_theta >1.0 (because sin(theta') would be >1)
+        bool cannot_refract = ri * sin_theta > 1.0;
+        vec3 direction;
+
+        if (cannot_refract) //If the combination of ray_in angle and refraction index doesn't allow the ray to be refracted (sin(theta')>1)
+            direction = reflect(unit_direction, rec.normal); //The ray is reflected
+        else
+            direction = refract(unit_direction, rec.normal, ri);//Else, it's refracted
+
+        scattered = ray(rec.p, direction);
+
         return true;
     }
 
