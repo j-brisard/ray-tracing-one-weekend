@@ -13,9 +13,9 @@ int main() {
 
     //Materials
     auto material_ground = make_shared<lambertian>(color(0.8, 0.8, 0.0));
-    auto material_left   = make_shared<metal>(color(0.2, 0.2, 0.8));
+    auto material_left   = make_shared<metal>(color(0.2, 0.2, 0.8),0.2);
     auto material_center = make_shared<lambertian>(color(0.8, 0.8, 0.8));
-    auto material_right  = make_shared<metal>(color(0.8, 0.2, 0.2));
+    auto material_right  = make_shared<metal>(color(0.8, 0.2, 0.2),0);
 
     //Spheres
     world.add(make_shared<sphere>(point3( 0.0, -100.5, -1.0), 100.0, material_ground));

@@ -37,19 +37,20 @@ class lambertian : public material {
 
 class metal : public material {
   public:
-    metal(const color& albedo) : albedo(albedo) {}
-
+    metal(const color& albedo, const double fuzz) : albedo(albedo), fuzz(fuzz < 1 ? fuzz : 1){}
+    
     bool scatter(const ray& r_in, const hit_record& rec, color& attenuation, ray& scattered)
     const override {
-        vec3 reflect_direction = reflect(r_in.direction(), rec.normal);
-        
-        scattered = ray(rec.p, reflect_direction);
+        vec3 reflected = reflect(r_in.direction(), rec.normal);
+        reflected = unit_vector(reflected) + fuzz*random_unit_vector();
+        scattered = ray(rec.p, reflected);
         attenuation = albedo;
-        return true;
+        return (dot(reflected,rec.normal) > 0); //We ignore the rays pointing inside the surface
     }
 
   private:
     color albedo;
+    double fuzz;
 };
 
 #endif
